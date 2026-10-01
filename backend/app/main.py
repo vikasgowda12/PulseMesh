@@ -1,3 +1,5 @@
+import os
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -9,13 +11,22 @@ from app.events.producer import publish_incident_created
 from strawberry.fastapi import GraphQLRouter
 from app.graphql_api.schema import schema
 from app.db.database import get_db
+from app.db.init_db import init_db
 from app.db.models import Incident
+from app.core.config import settings
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    init_db()
+    yield
 
 
 app = FastAPI(
     title="PulseMesh API",
     description="Incident detection and management API",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
@@ -26,8 +37,9 @@ app.include_router(graphql_app, prefix="/graphql")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        origin.strip()
+        for origin in os.getenv("FRONTEND_URLS", settings.FRONTEND_URLS).split(",")
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -56,6 +68,11 @@ class IncidentResponse(BaseModel):
 @app.get("/")
 def root():
     return {"message": "Welcome to PulseMesh API"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.post(
