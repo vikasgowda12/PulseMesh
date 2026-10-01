@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pulsemesh;
+
+service IncidentService {
+  rpc GetIncident (GetIncidentRequest) returns (GetIncidentResponse);
+}
+
+message GetIncidentRequest {
+  int32 incident_id = 1;
+}
+
+message GetIncidentResponse {
+  int32 id = 1;
+  string service_name = 2;
+  string severity = 3;
+  string status = 4;
+  string description = 5;
+  string created_at = 6;
+  string resolved_at = 7;
+}

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+confluent-kafka
+grpcio
+grpcio-tools
+strawberry-graphql[fastapi]
+sqlalchemy
+psycopg[binary]
+pydantic-settings
+python-dotenv
+pytest
+httpx
